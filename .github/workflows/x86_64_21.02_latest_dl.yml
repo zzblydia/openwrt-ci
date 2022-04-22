@@ -55,7 +55,6 @@ jobs:
 
           echo "src-git openclash https://github.com/zzblydia/OpenClash.git" >> feeds.conf.default
           echo "src-git helloworld https://github.com/zzblydia/helloworld.git" >> feeds.conf.default
-          echo "src-git passwall https://github.com/zzblydia/openwrt-passwall.git" >> feeds.conf.default
 
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -70,9 +69,10 @@ jobs:
         run: |
           make -j1 download V=s
           find dl -size -1024c -exec rm -f {} \;
+          tar zcvf ./dl.tar.gz ./dl
           
       - name: Deliver openwrt dl libraries
         uses: actions/upload-artifact@v2
         with:
           name: openwrt_dl
-          path: ./dl
+          path: ./dl.tar.gz
