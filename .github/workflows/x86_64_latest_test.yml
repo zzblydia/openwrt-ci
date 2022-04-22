@@ -1,0 +1,30 @@
+# test workflow 
+# https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo 
+
+name: x86_64_latest_test
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: 0 20 * * *
+  #push:
+  #  branches: 
+  #    - openwrt-21.02
+  release:
+    types: [published]
+
+jobs:
+
+  build_openwrt:
+
+    name: x86_64_latest_test_build
+
+    runs-on: ubuntu-latest
+
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+      - name: Show environment v1
+        run: env | grep ^GITHUB
+      - name: Show ref v1
+        run: echo "===============> Version from $GITHUB_REF"
