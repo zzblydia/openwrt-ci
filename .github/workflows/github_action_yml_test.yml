@@ -45,5 +45,5 @@ jobs:
       - name: Generate configuration file
         #run: make defconfig
         run:  |
-          cp x86_64.config.buildinfo .config  # Write changes to .config
-          make defconfig                      # Expand to full config
+          cp ./diffconfigs/x86_64.config.buildinfo .config  # Write changes to .config
+          make defconfig                                    # Expand to full config

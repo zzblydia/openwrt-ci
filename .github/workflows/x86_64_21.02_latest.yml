@@ -27,6 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          repository: zzblydia/openwrt
           ref: openwrt-21.02
 
       - name: Space cleanup
