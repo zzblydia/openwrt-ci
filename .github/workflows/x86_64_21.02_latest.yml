@@ -53,6 +53,13 @@ jobs:
           #  svn checkout "https://github.com/immortalwrt/packages/trunk/net/$i" "package/helloworld/$i"; \
           # done
 
+          echo "" > feeds.conf.default # clear all
+          echo "src-git packages https://github.com/zzblydia/packages.git;openwrt-21.02" >> feeds.conf.default
+          echo "src-git luci https://github.com/zzblydia/luci.git;openwrt-21.02" >> feeds.conf.default
+          
+          echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-21.02" >> feeds.conf.default
+          echo "src-git telephony https://git.openwrt.org/feed/telephony.git;openwrt-21.02" >> feeds.conf.default
+          
           echo "src-git helloworld https://github.com/zzblydia/helloworld.git" >> feeds.conf.default
           echo "src-git openclash https://github.com/zzblydia/OpenClash.git" >> feeds.conf.default
 
@@ -63,8 +70,8 @@ jobs:
       - name: Generate configuration file
         #run: make defconfig
         run:  |
-          cp x86_64.config.buildinfo .config  # Write changes to .config
-          make defconfig                      # Expand to full config
+          cp ./diffconfigs/x86_64.config.buildinfo .config  # Write changes to .config
+          make defconfig                                    # Expand to full config
 
       - name: Make download
         run: |
