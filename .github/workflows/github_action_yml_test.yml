@@ -1,49 +1,89 @@
 # 用于测试github action yml 语法
+# 1.测试代码checkout功能
+# 2.测试if条件的作用范围(if在job里有效/if在steps里有效/if在run里无效)
+# 3.测试不同job的顺序执行
 
 name: github_action_yml_test
 
 on:
   workflow_dispatch:
+    inputs:
+      compilingMode:
+        description: 'compile mode'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+        - download
+        - debug
+        - release
   release:
     types: [published]
 
 jobs:
 
-  build_openwrt:
-
-    name: github action yml test
+  job_01:
+    name: job_01
+    if: github.event.repository.owner.id == github.event.sender.id # 有效
 
     runs-on: ubuntu-latest
-
-    if: github.event.repository.owner.id == github.event.sender.id
-
     steps:
 
-      - name: Checkout
+      - name: code checkout
         uses: actions/checkout@v2
         with:
-          repository: zzblydia/openwrt
-          ref: openwrt-21.02
+          repository: openwrt/openwrt
+          ref: openwrt-23.05
 
-      - name: Space cleanup
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      - name: code check and space check
         run: |
           git branch -a
           git log -n 1
           df -h
 
-      - name: Update feeds
+      - name: env check
         run: |
-          echo "src-git openclash https://github.com/zzblydia/OpenClash.git" >> feeds.conf.default
-          echo "src-git helloworld https://github.com/zzblydia/helloworld.git" >> feeds.conf.default
+          echo ${{ inputs.compilingMode }}
 
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
-          ./scripts/feeds install -a
+      - name: test if 01
+        if: inputs.compilingMode == 'debug' # 有效
+        run: |
+          echo "test if 01 output debug"
 
-      - name: Generate configuration file
-        #run: make defconfig
-        run:  |
-          cp ./diffconfigs/x86_64.config.buildinfo .config  # Write changes to .config
-          make defconfig                                    # Expand to full config
+      - name: test if 02
+        if: inputs.compilingMode == 'release' # 有效
+        run: |
+          echo "test if 02 output release"
+
+    # - name: test if 03
+    #   run: |
+    #     if: inputs.compilingMode == 'debug' # 无效, 因为这里是shell的内容, shell中找不到if:
+    #     echo "test if 03 output 111"
+    #     echo "test if 03 output 222"
+    # 
+    #     echo "test if 03 output 333"
+    # 
+    #     if: inputs.compilingMode == 'release'
+    #     echo "test if 03 output 444"
+    #     echo "test if 03 output 555"
+    #     
+    #     echo "test if 03 output 666"
+    
+      - name: test if 04
+        run: |
+          if [ ${{ inputs.compilingMode }} == 'release' ]; then
+            echo "test if 04 output release"
+          else
+            echo "test if 04 output ${{ inputs.compilingMode }}"
+          fi 
+
+  job_02:
+    name: job_02
+    if: inputs.compilingMode == 'release'
+
+    runs-on: ubuntu-22.04
+    steps:
+      - name: env check
+        run: |
+          echo ${{ github.workflow }}
+    
