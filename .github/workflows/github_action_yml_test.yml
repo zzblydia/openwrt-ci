@@ -1,7 +1,8 @@
 # 用于测试github action yml 语法
-# 1.测试代码checkout功能
+# 1.测试代码checkout功能(ref可以是branch, tag or SHA)
 # 2.测试if条件的作用范围(if在job里有效/if在steps里有效/if在run里无效)
-# 3.测试不同job的顺序执行
+# 3.测试不同job的顺序执行(默认不同job是并行, 顺序执行需要指定need)
+# 4.run:后跟|符号表示一个多行字符串(Literal Block Scalar).它用于在 run 步骤中指定需要执行的多行命令. 多个命令间用空格分开时空行不用首行缩进.
 
 name: github_action_yml_test
 

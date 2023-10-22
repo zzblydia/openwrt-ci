@@ -1,2 +1,2 @@
 # openwrt-ci
-openwrt official version continuous integration
+Continuous Integration of Personalized Custom OpenWrt Versions
