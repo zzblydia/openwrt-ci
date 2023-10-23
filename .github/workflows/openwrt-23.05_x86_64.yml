@@ -30,14 +30,14 @@ jobs:
 
     runs-on: ubuntu-22.04
     steps:
-      - name: code checkout
+      - name: code_checkout
         uses: actions/checkout@v4
         with:
           repository: ifreedoms/openwrt
           ref: openwrt-23.05
           fetch-depth: 1
 
-      - name: environment prepare
+      - name: environment_prepare
         run: |
           docker rmi `docker images -q`
           sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
@@ -54,18 +54,18 @@ jobs:
           echo "-----------------------------------------------------------------------"
           df -h
 
-      - name: update feeds
+      - name: update_feeds
         run: |
           ./scripts/feeds update  -a
           ./scripts/feeds install -a
           ./scripts/feeds install -a   # 验证"缺少依赖的warning"为安装顺序导致的误告警
 
-      - name: generate configuration file
+      - name: generate_configuration_file
         run: |
           cp ./diffconfigs/x86_64.config.buildinfo .config  # write changes to .config
           make defconfig                                    # expand to full config
 
-      - name: make download libraries
+      - name: make_download_libraries
         run: |
           echo "compiling_mode: ${{ inputs.compiling_mode }}"
           
@@ -77,7 +77,7 @@ jobs:
           
           find dl -size -1024c -exec rm -f {} \;
           
-      - name: compile firmware
+      - name: compile_firmware
         if: inputs.compiling_mode == 'single-threaded' || inputs.compiling_mode == 'multi-threaded'
         run: |
           echo "compiling_mode: ${{ inputs.compiling_mode }}"
@@ -94,47 +94,38 @@ jobs:
           du -h --max-depth=1 ./build_dir
           du -h --max-depth=1 ./bin
 
-      - name: prepare artifact
+      - name: prepare_artifact
         run: |
           echo "compiling_mode: ${{ inputs.compiling_mode }}"
           
           if [[ ${{ inputs.compiling_mode }} == 'single-threaded' || ${{ inputs.compiling_mode }} == 'multi-threaded' ]]; then
             mkdir -p ./artifact/firmware
-            mkdir -p ./artifact/package
-            mkdir -p ./artifact/buildinfo
-            
             rm -rf $(find ./bin/targets/  -type d -name "packages")
-            cp -rf $(find ./bin/targets/  -type f)                                            ./artifact/firmware/
-            cp -rf $(find ./bin/packages/ -type f -name "*.ipk")                              ./artifact/package/
-            cp -rf $(find ./bin/targets/  -type f -name "*.buildinfo" -o -name "*.manifest")  ./artifact/buildinfo/
+            cp -rf $(find ./bin/targets/  -type f) ./artifact/firmware/
             
-            tar zcvf ./openwrt_package.tar.gz ./artifact/package/
+            # mkdir -p ./artifact/package
+            # mkdir -p ./artifact/buildinfo
+            # cp -rf $(find ./bin/packages/ -type f -name "*.ipk")                              ./artifact/package/
+            # cp -rf $(find ./bin/targets/  -type f -name "*.buildinfo" -o -name "*.manifest")  ./artifact/buildinfo/
           fi
           
           tar zcvf ./dl.tar.gz ./dl
 
-      - name: deliver buildinfo
+      - name: deliver_packages
         if: inputs.compiling_mode == 'single-threaded' || inputs.compiling_mode == 'multi-threaded'
         uses: actions/upload-artifact@v3
         with:
-          name: openwrt_buildinfo
-          path: ./artifact/buildinfo/
+          name: openwrt_packages
+          path: ./bin/packages/
 
-      - name: deliver package
-        if: inputs.compiling_mode == 'single-threaded' || inputs.compiling_mode == 'multi-threaded'
-        uses: actions/upload-artifact@v3
-        with:
-          name: openwrt_package
-          path: ./openwrt_package.tar.gz
-
-      - name: deliver firmware
+      - name: deliver_firmware
         if: inputs.compiling_mode == 'single-threaded' || inputs.compiling_mode == 'multi-threaded'
         uses: actions/upload-artifact@v3
         with:
           name: openwrt_firmware
-          path: ./bin/targets/
+          path: ./artifact/firmware/
 
-      - name: deliver dl libraries
+      - name: deliver_dl_libraries
         uses: actions/upload-artifact@v3
         with:
           name: openwrt_dl
