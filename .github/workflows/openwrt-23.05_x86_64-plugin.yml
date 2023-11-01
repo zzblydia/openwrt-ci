@@ -50,6 +50,9 @@ jobs:
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
           
+          echo "src-git helloworld https://github.com/ifreedoms/helloworld.git;main" >>feeds.conf.default
+          echo "src-git OpenClash  https://github.com/ifreedoms/OpenClash.git" >>feeds.conf.default
+          
           echo "-----------------------------------------------------------------------"
           git branch
           echo "-----------------------------------------------------------------------"
@@ -63,8 +66,8 @@ jobs:
 
       - name: generate_configuration_file
         run: |
-          cp ./diffconfigs/x86_64.config.buildinfo .config  # write changes to .config
-          make defconfig                                    # expand to full config
+          cp ./diffconfigs/x86_64_plugin.config.buildinfo .config  # write changes to .config
+          make defconfig                                           # expand to full config
 
       - name: make_download_libraries
         run: |
